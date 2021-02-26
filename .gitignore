@@ -1,0 +1,9 @@
+# no public
+推研题目/**
+# vscode config
+**/.vscode/**
+# executable file
+**/main
+**/main.exe
+# mac
+**/.DS_Store
