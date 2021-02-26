@@ -9,12 +9,17 @@
 
 WA检查单
 ---
+1. 数据范围与变量类型是否匹配
 
 MLE检查单
 ---
 
 TLE检查单
 ---
+1. 逻辑死循环
+2. map和set是否可以转换为unordered（C++）
+3. map和set清空用erase（避免使用M[x]=0）
+4. unordered_map换用数组+自实现
 
 RE检查单
 ---
