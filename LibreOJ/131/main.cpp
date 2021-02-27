@@ -7,7 +7,7 @@ using namespace std;
 
 // 树状数组(标准): 区间和
 // 注意: 相关数组从1计数! 数组类型通过模板DataType给入.
-// 警告: 清空树状数组(惰性)暂时未测试. 代码测试不完善.
+// 警告: 清空树状数组(惰性)未经过测试. 代码测试不完善.
 // 已通过题目: LibreOJ-130.
 template <class DataType>
 class BinaryIndexedTree
@@ -129,7 +129,7 @@ void BinaryIndexedTree<DataType>::update(int pos, DataType val)
 // 树状数组(差分): 区间和, 支持区间add操作
 // BinaryIndexedTreeFD基于BinaryIndexedTree实现
 // 注意: 相关数组从1计数! 数组类型通过模板DataType给入.
-// 已通过题目: LibreOJ-131, LibreOJ-132.
+// 已通过题目: .
 template <class DataType>
 class BinaryIndexedTreeFD
 {
@@ -216,4 +216,31 @@ template <class DataType>
 void BinaryIndexedTreeFD<DataType>::add(int k, DataType val)
 {
     add(k, k, val);
+}
+
+
+LL A[1000006];
+int main()
+{
+    int n, q;
+    scanf("%d%d", &n, &q);
+    for (int i = 1; i <= n; ++i)
+        scanf("%lld", A + i);
+    BinaryIndexedTreeFD<LL> bit = BinaryIndexedTreeFD<LL>(1000006);
+    bit.init(A, n);
+    for (int i = 0; i < q; ++i)
+    {
+        int a, b, c, d;
+        scanf("%d", &a);
+        if (a == 1)
+        {
+            scanf("%d%d%d", &b, &c, &d);
+            bit.add(b, c, d);
+        }
+        else
+        {
+            scanf("%d", &b);
+            printf("%lld\n", bit.getsum(b,b));
+        }
+    }
 }
