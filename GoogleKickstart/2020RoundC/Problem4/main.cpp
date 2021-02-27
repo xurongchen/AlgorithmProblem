@@ -3,12 +3,11 @@ using namespace std;
 #define LL long long
 #define LD long double
 
-// 数据结构
 
 // 树状数组(标准): 区间和
 // 注意: 相关数组从1计数! 数组类型通过模板DataType给入.
 // 警告: 清空树状数组(惰性)暂时未测试. 代码测试不完善.
-// 已通过题目: LibreOJ-130, KickStart 2020C P4.
+// 已通过题目: LibreOJ-130.
 template <class DataType>
 class BinaryIndexedTree
 {
@@ -126,94 +125,56 @@ void BinaryIndexedTree<DataType>::update(int pos, DataType val)
     add(pos, val - getsum(pos, pos));
 }
 
-// 树状数组(差分): 区间和, 支持区间add操作
-// BinaryIndexedTreeFD基于BinaryIndexedTree实现
-// 注意: 相关数组从1计数! 数组类型通过模板DataType给入.
-// 已通过题目: LibreOJ-131, LibreOJ-132.
-template <class DataType>
-class BinaryIndexedTreeFD
+LL A[200005];
+LL IA[200005];
+BinaryIndexedTree<LL> SA = BinaryIndexedTree<LL>(200005);
+BinaryIndexedTree<LL> SIA = BinaryIndexedTree<LL>(200005);
+void solve(int Case)
 {
-    BinaryIndexedTree<DataType> *FD;  //原数组A差分(F)的树状数组
-    BinaryIndexedTree<DataType> *FDi; //F * i 的树状数组
-
-public:
-    BinaryIndexedTreeFD(int MAX_SIZE);
-    ~BinaryIndexedTreeFD();
-    void init(DataType *A, int N);        //从A[1..N]初始化, O(N).
-    DataType getsum(int l, int r);        //计算原数组l到r的区间和
-    DataType getsum(int k);               //计算原数组前k项的区间和
-    long long getsumLL(int l, int r);     //计算原数组l到r的区间和, 强制返回long long
-    long long getsumLL(int k);            //计算原数组前k项的区间和, 强制返回long long
-    void add(int l, int r, DataType val); //原数组l到r区间增加val
-    void add(int k, DataType val);        //原数组pos增加val
-    void reset(int N);                    //清空树状数组(惰性), 相当于用全0数组初始化, O(1);
-};
-
-template <class DataType>
-void BinaryIndexedTreeFD<DataType>::init(DataType *A, int N)
-{
-    DataType *ArrayFD = new DataType[N + 1];
-    DataType *ArrayFDi = new DataType[N + 1];
-    ArrayFD[1] = A[1];
-    ArrayFDi[1] = A[1];
-    for (int i = 2; i <= N; ++i)
+    int N, Q;
+    
+    cin >> N >> Q;
+    for (int i = 1; i <= N; ++i)
     {
-        ArrayFD[i] = A[i] - A[i - 1];
-        ArrayFDi[i] = ArrayFD[i] * i;
+        cin >> A[i];
+        IA[i] = A[i] * i * (i % 2 * 2 - 1);
+        A[i] = A[i] * (i % 2 * 2 - 1);
     }
-    this->FD->init(ArrayFD, N);
-    this->FDi->init(ArrayFDi, N);
 
-    delete[] ArrayFD;
-    delete[] ArrayFDi;
-}
-
-template <class DataType>
-BinaryIndexedTreeFD<DataType>::BinaryIndexedTreeFD(int MAXSIZE)
-{
-    this->FD = new BinaryIndexedTree<DataType>(MAXSIZE);
-    this->FDi = new BinaryIndexedTree<DataType>(MAXSIZE);
-}
-
-template <class DataType>
-BinaryIndexedTreeFD<DataType>::~BinaryIndexedTreeFD()
-{
-    delete FD;
-    delete FDi;
-}
-template <class DataType>
-DataType BinaryIndexedTreeFD<DataType>::getsum(int l, int r)
-{
-    return (r + 1) * this->FD->getsum(r) - l * this->FD->getsum(l - 1) -
-           (this->FDi->getsum(r) - this->FDi->getsum(l - 1));
-}
-template <class DataType>
-DataType BinaryIndexedTreeFD<DataType>::getsum(int k)
-{
-    return getsum(1, k);
-}
-template <class DataType>
-LL BinaryIndexedTreeFD<DataType>::getsumLL(int l, int r)
-{
-    return (r + 1LL) * this->FD->getsumLL(r) - l * this->FD->getsumLL(l - 1) -
-           (this->FDi->getsumLL(r) - this->FDi->getsumLL(l - 1));
-}
-template <class DataType>
-LL BinaryIndexedTreeFD<DataType>::getsumLL(int k)
-{
-    return getsumLL(1, k);
-}
-template <class DataType>
-void BinaryIndexedTreeFD<DataType>::add(int l, int r, DataType val)
-{
-    this->FD->add(l, val);
-    this->FDi->add(l, l * val);
-    this->FD->add(r + 1, -val);
-    this->FDi->add(r + 1, (r + 1) * -val);
+    SA.init(A, N);
+    SIA.init(IA, N);
+    LL Sum = 0LL;
+    for(int i = 0; i < Q; ++i)
+    {
+        char QName[5];
+        cin >> QName;
+        if(QName[0] == 'U')
+        {
+            int x, v;
+            cin >> x >> v;
+            SA.update(x, v * (x % 2 * 2 - 1));
+            SIA.update(x, x * v * (x % 2 * 2 - 1));
+        }
+        else
+        {
+            int l,r;
+            cin >> l >> r;
+            Sum += (SIA.getsum(r) - SIA.getsum(l-1)) * (l % 2 * 2 - 1) - 
+                (l-1) * (SA.getsum(r) - SA.getsum(l-1)) * (l % 2 * 2 - 1);
+        }
+    }
+    
+    printf("Case #%d: %lld\n", Case, Sum);
 }
 
-template <class DataType>
-void BinaryIndexedTreeFD<DataType>::add(int k, DataType val)
+int main()
 {
-    add(k, k, val);
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int T;
+    cin >> T;
+    for (int i = 0; i < T; ++i)
+    {
+        solve(i + 1);
+    }
 }
