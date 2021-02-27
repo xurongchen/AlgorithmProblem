@@ -193,13 +193,13 @@ DataType BinaryIndexedTreeFD<DataType>::getsum(int k)
     return getsum(1, k);
 }
 template <class DataType>
-long long BinaryIndexedTreeFD<DataType>::getsumLL(int l, int r)
+LL BinaryIndexedTreeFD<DataType>::getsumLL(int l, int r)
 {
     return (r + 1LL) * this->FD->getsumLL(r) - l * this->FD->getsumLL(l - 1) -
            (this->FDi->getsumLL(r) - this->FDi->getsumLL(l - 1));
 }
 template <class DataType>
-long long BinaryIndexedTreeFD<DataType>::getsumLL(int k)
+LL BinaryIndexedTreeFD<DataType>::getsumLL(int k)
 {
     return getsumLL(1, k);
 }
