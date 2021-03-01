@@ -1,5 +1,6 @@
 # no public
 推研题目/**
+MSCoding/**
 # vscode config
 **/.vscode/**
 # executable file
@@ -7,3 +8,7 @@
 **/main.exe
 # mac
 **/.DS_Store
+# test input and output
+**/*.in
+**/*.out
+**/diff
