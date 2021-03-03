@@ -1,14 +1,12 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define LL long long
-#define LD long double
 
-// 数据结构
 
 // 树状数组(标准): 区间和
 // 注意: 相关数组从1计数! 数组类型通过模板DataType给入.
 // 警告: 清空树状数组(惰性)暂时未测试. 代码测试不完善.
-// 已通过题目: LibreOJ-130, KickStart 2020C P4, KickStart 2020E P3.
+// 已通过题目: LibreOJ-130, KickStart 2020C P4.
 template <class DataType>
 class BinaryIndexedTree
 {
@@ -126,94 +124,91 @@ void BinaryIndexedTree<DataType>::update(int pos, DataType val)
     add(pos, val - getsum(pos, pos));
 }
 
-// 树状数组(差分): 区间和, 支持区间add操作
-// BinaryIndexedTreeFD基于BinaryIndexedTree实现
-// 注意: 相关数组从1计数! 数组类型通过模板DataType给入.
-// 已通过题目: LibreOJ-131, LibreOJ-132.
-template <class DataType>
-class BinaryIndexedTreeFD
-{
-    BinaryIndexedTree<DataType> *FD;  //原数组A差分(F)的树状数组
-    BinaryIndexedTree<DataType> *FDi; //F * i 的树状数组
 
-public:
-    BinaryIndexedTreeFD(int MAX_SIZE);
-    ~BinaryIndexedTreeFD();
-    void init(DataType *A, int N);        //从A[1..N]初始化, O(N).
-    DataType getsum(int l, int r);        //计算原数组l到r的区间和
-    DataType getsum(int k);               //计算原数组前k项的区间和
-    long long getsumLL(int l, int r);     //计算原数组l到r的区间和, 强制返回long long
-    long long getsumLL(int k);            //计算原数组前k项的区间和, 强制返回long long
-    void add(int l, int r, DataType val); //原数组l到r区间增加val
-    void add(int k, DataType val);        //原数组pos增加val
-    void reset(int N);                    //清空树状数组(惰性), 相当于用全0数组初始化, O(1);
+
+LL E[100005];
+LL R[100005];
+BinaryIndexedTree<LL> bit = BinaryIndexedTree<LL>(100005);
+
+struct QB
+{
+    LL ER;
+    LL E;
+    int K;
+    QB(LL _ER, int _K, LL _E):ER(_ER), K(_K), E(_E){}
 };
-
-template <class DataType>
-void BinaryIndexedTreeFD<DataType>::init(DataType *A, int N)
+struct QB1
 {
-    DataType *ArrayFD = new DataType[N + 1];
-    DataType *ArrayFDi = new DataType[N + 1];
-    ArrayFD[1] = A[1];
-    ArrayFDi[1] = A[1];
-    for (int i = 2; i <= N; ++i)
+    LL ER;
+    LL E;
+    int K;
+    QB1(LL _ER, int _K, LL _E):ER(_ER), K(_K), E(_E){}
+    QB1(QB q):ER(q.ER), K(q.K), E(q.E){}
+};
+bool operator < (QB x, QB y)
+{
+    return x.ER < y.ER;
+}
+bool operator < (QB1 x, QB1 y)
+{
+    return x.K > y.K;
+}
+void solve(int Case)
+{
+    int N;
+    cin >> N;
+    LL SumE = 0;
+    priority_queue<QB> PQ;
+    priority_queue<QB1> PQ1;
+    for (int i = 1; i <= N; ++i)
     {
-        ArrayFD[i] = A[i] - A[i - 1];
-        ArrayFDi[i] = ArrayFD[i] * i;
+        cin >> E[i] >> R[i];
+        SumE += E[i];
+        PQ.push(QB(E[i] + R[i], i, E[i]));
     }
-    this->FD->init(ArrayFD, N);
-    this->FDi->init(ArrayFDi, N);
-
-    delete[] ArrayFD;
-    delete[] ArrayFDi;
+    bit.init(E, N);
+    int RM = 0;
+    LL BST = -1;
+    int BST_RM = 0;
+    
+    while(!PQ.empty() || !PQ1.empty())
+    {
+        while(!PQ.empty() && PQ.top().ER > SumE)
+        {
+            PQ1.push(QB1(PQ.top()));
+            PQ.pop();
+        }
+        if(PQ1.empty()) {
+            printf("Case #%d: %d INDEFINITELY\n", Case, RM);
+            return;
+        }
+        QB1 top = PQ1.top();
+        PQ1.pop();
+        // printf("TOP: ER=%lld,E=%lld,K=%d\n", top.ER,top.E,top.K);
+        LL Rst = SumE;
+        if(top.K > 1)
+            Rst += bit.getsum(1, top.K - 1);
+        // printf("Rst: SumE=%lld,Rst=%lld", SumE, Rst);
+        if(Rst > BST)
+        {
+            BST = Rst;
+            BST_RM = RM;
+        }
+        RM += 1;
+        SumE -= top.E;
+        bit.update(top.K, 0);
+    }
+    printf("Case #%d: %d %lld\n", Case, BST_RM, BST);
 }
 
-template <class DataType>
-BinaryIndexedTreeFD<DataType>::BinaryIndexedTreeFD(int MAXSIZE)
+int main()
 {
-    this->FD = new BinaryIndexedTree<DataType>(MAXSIZE);
-    this->FDi = new BinaryIndexedTree<DataType>(MAXSIZE);
-}
-
-template <class DataType>
-BinaryIndexedTreeFD<DataType>::~BinaryIndexedTreeFD()
-{
-    delete FD;
-    delete FDi;
-}
-template <class DataType>
-DataType BinaryIndexedTreeFD<DataType>::getsum(int l, int r)
-{
-    return (r + 1) * this->FD->getsum(r) - l * this->FD->getsum(l - 1) -
-           (this->FDi->getsum(r) - this->FDi->getsum(l - 1));
-}
-template <class DataType>
-DataType BinaryIndexedTreeFD<DataType>::getsum(int k)
-{
-    return getsum(1, k);
-}
-template <class DataType>
-LL BinaryIndexedTreeFD<DataType>::getsumLL(int l, int r)
-{
-    return (r + 1LL) * this->FD->getsumLL(r) - l * this->FD->getsumLL(l - 1) -
-           (this->FDi->getsumLL(r) - this->FDi->getsumLL(l - 1));
-}
-template <class DataType>
-LL BinaryIndexedTreeFD<DataType>::getsumLL(int k)
-{
-    return getsumLL(1, k);
-}
-template <class DataType>
-void BinaryIndexedTreeFD<DataType>::add(int l, int r, DataType val)
-{
-    this->FD->add(l, val);
-    this->FDi->add(l, l * val);
-    this->FD->add(r + 1, -val);
-    this->FDi->add(r + 1, (r + 1) * -val);
-}
-
-template <class DataType>
-void BinaryIndexedTreeFD<DataType>::add(int k, DataType val)
-{
-    add(k, k, val);
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int T;
+    cin >> T;
+    for (int i = 0; i < T; ++i)
+    {
+        solve(i + 1);
+    }
 }

@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define LL long long
+
+int A[200005];
+void solve(int Case)
+{
+    int N;
+    cin >> N;
+    for (int i = 0; i < N; ++i)
+    {
+        cin >> A[i];
+    }
+    
+    int Cnt = 1, d = 0, Max = 0;
+    for (int i = 1; i < N; ++i)
+    {
+        if(A[i] - A[i-1] == d)
+            Cnt += 1;
+        else {
+            d = A[i] - A[i - 1];
+            if(Max < Cnt) Max = Cnt;
+            Cnt = 2;
+        }
+    }
+    if(Max < Cnt) Max = Cnt;
+    printf("Case #%d: %d\n", Case, Max);
+}
+
+int main()
+{
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int T;
+    cin >> T;
+    for (int i = 0; i < T; ++i)
+    {
+        solve(i + 1);
+    }
+}
